@@ -12,14 +12,6 @@ typedef struct {
 
 char tokenSpace[MAXLINE+1];
 
-void cleanTo(char input[], char flag) {
-    int i = 0;
-    while(input[i] != flag) {
-        input[i] = '\0';
-        i++;
-    }
-}
-
 void cleanTo(char input[], int length) {
     for(int i = 0; i < length; i++) {
         input[i] = '\0';

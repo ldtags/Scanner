@@ -4,22 +4,6 @@ FILE * source, * out;
 char * currentLine;
 int line, col;
 
-int main() {
-    if(openFiles("C:/Users/Duncan/Desktop/compsci/cs442/IOManager/sTest", "C:/Users/Duncan/Desktop/compsci/cs442/IOManager/lTest") == 0)
-        return 1;
-    char fChar;
-    while(fChar != EOF) {
-        fChar = getNextSourceChar();
-    }
-
-    writeInidcator(7);
-    writeMessage("Missing semicolon");
-
-    closeFiles();
-
-    return 0;
-}
-
 int openFiles(char * sourceName, char * listingName) {
     source = fopen(sourceName, "r");
     if(source == NULL)  // file was unable to be created
@@ -58,7 +42,7 @@ char getNextSourceChar() {
         char buf[MAXLINE];
         currentLine = fgets(buf, MAXLINE, source);
         // end of file has been reached
-        if(currentLine == NULL || currentLine == EOF)
+        if(currentLine == NULL)
             return EOF;
 
         col = 0;

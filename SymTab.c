@@ -7,24 +7,6 @@ int hash(SymTab *table, char *name);
 SymEntry * createSymEntry(char *name);
 void printTable(SymTab *table);
 
-int main() {
-    // driver code here
-    SymTab * table = malloc(sizeof(SymTab));
-    table = createSymTab(6);
-    char * name[] = {"Liam", "Jake", "Harold", "Liam", "Terry", "Colin", "Jessica", "Amanda", "Jebodiah"};
-    int * nameTest = malloc(sizeof(int));
-    for(int i = 0; i < 9; i++) {
-        enterName(table, name[i]);
-        printTable(table);
-        *nameTest = findName(table, name[i]);
-        if(*nameTest) {
-            printf("%s exists in the symtab!!\n\n", name[i]);
-        } else {
-            printf("%s does not exist in the symtab\n\n", name[i]);
-        }
-    }
-}
-
 SymTab * createSymTab(int size) {
     SymTab *table = malloc(sizeof(SymTab));
     if(table == NULL)
