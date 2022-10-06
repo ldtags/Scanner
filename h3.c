@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include "SymTab.h"
 #include "IOMngr.h"
+#define HEX 0
+#define TEN 1
+#define ID 2
 
 typedef struct {
-    char *type;
+    int type;
     int count;
 } Attribute;
 
@@ -38,19 +41,19 @@ int main(char *argv[], int argc) {
     while((token = getNextSourceChar()) != EOF) {
 
         // load the next char from the source file into the token array
-        tokenSpace[index] = token;
+        tokenSpace[tlength] = token;
         
         // full token encountered
         if(token == '\0' || token == '\n') {
-            int illegal = 0;
-            char *type;
+            int type;
 
+            // determining type of id
             if(tlength > 1 && tokenSpace[0] == '0' && tokenSpace[1] == 'x') {
-                type = "Hex";
+                type = HEX;
             } else if(tokenSpace[0] >= 48 && tokenSpace[0] <= 57) {
-                type = "Ten";
+                type = TEN;
             } else {
-                type = "Id";
+                type = ID;
             }
 
             for(i = 0; i < tlength; i++) {
@@ -62,43 +65,71 @@ int main(char *argv[], int argc) {
                         if(tlength > 1) { 
                             errCols[index - tlength + i] += 2; // a two in an error column indicates an illegal token
                         } 
-                } else if(type == "Ten" && tokenSpace[i] >= 65 && tokenSpace[i] <= 122) {
+                } else if(type == TEN && tokenSpace[i] >= 65 && tokenSpace[i] <= 122) {
                     errCols[index - tlength] += 2;
-                } else if(type == "Hex" && ((tokenSpace[i] > 70 && tokenSpace[i] < 91) || tokenSpace[i] > 102)) {
+                } else if(type == HEX && ((tokenSpace[i] > 70 && tokenSpace[i] < 91) || tokenSpace[i] > 102)) {
                     errCols[index - tlength] += 2;
                 } else {
+                    // token is legal
                     // enter token into the SymTab
                     newToken = enterName(table, tokenSpace);
-        
+
                     // if the token is new, add an attribute struct, else increment the count if it's an ID
                     if(newToken) {
                         attr = (Attribute*) malloc(sizeof(Attribute));
                         attr->count = 1;
+                        attr->type = type;
                         setCurrentAttr(table, attr);
                     } else {
                         attr = getCurrentAttr(table);
-                        if(attr->type == "Id")
+                        if(attr->type == ID)
                             attr->count++;
                     }
                 }
             }
 
-            free(illegal);
-            free(type);
+            // cleaning out token buffer
+            cleanTo(tokenSpace, tlength);
             tlength = 0;
         } else {
             tlength++;
         }
 
         if(token == '\n') {
-            i = 0;
-            while(errCols[i] != -1) {
-                writeInidcator(errCols[i]);
-                writeMessage("Illegal character");
+            int i;
+            // printing out errors
+            for(i = 0; i < index; i++) {
+                // if an error column is odd, it's an illegal character
+                if(errCols[i] % 2 == 1) {
+                    writeInidcator(i);
+                    writeMessage("Illegal character");
+                    errCols[i]--;
+                }
+            }
+
+            for(i = 0; i < index; i++) {
+                // if an error column is not zero, it's a flag for an illegal token
+                if(errCols[i] != 0) {
+                    writeInidcator(i);
+                    writeMessage("Illegal token");
+                    errCols[i] = 0;
+                }
             }
             index = 0;
         } else {
             index++;
         }
     }
+
+    // printing contents of the SymTab to stdout
+    if(startIterator(table) == 0)
+        return 0;
+    
+    do {
+        printf("Token\tType\tCount");
+        attr = getCurrentAttr(table);
+
+    } while(nextEntry(table) != 0);
+
+    return 0;
 }
