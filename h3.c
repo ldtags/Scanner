@@ -126,10 +126,19 @@ int main(char *argv[], int argc) {
         return 0;
     
     do {
-        printf("Token\tType\tCount");
+        printf("Token\tType\tCount\n");
         attr = getCurrentAttr(table);
-
-    } while(nextEntry(table) != 0);
-
+        if(attr->type == ID) {
+            buf = "Id";
+        } else if(attr->type == HEX) {
+            buf = "Hex";
+        } else {
+            buf = "Ten";
+        }
+        printf("%s\t%s\t%d\n", getCurrentName(table), buf, attr->count);
+        free(attr);
+    } while(nextEntry(table));
+    destroySymTab(table);
+    
     return 0;
 }
