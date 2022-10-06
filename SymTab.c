@@ -1,0 +1,208 @@
+#include "SymTab.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int hash(SymTab *table, char *name);
+SymEntry * createSymEntry(char *name);
+void printTable(SymTab *table);
+
+int main() {
+    // driver code here
+    SymTab * table = malloc(sizeof(SymTab));
+    table = createSymTab(6);
+    char * name[] = {"Liam", "Jake", "Harold", "Liam", "Terry", "Colin", "Jessica", "Amanda", "Jebodiah"};
+    int * nameTest = malloc(sizeof(int));
+    for(int i = 0; i < 9; i++) {
+        enterName(table, name[i]);
+        printTable(table);
+        *nameTest = findName(table, name[i]);
+        if(*nameTest) {
+            printf("%s exists in the symtab!!\n\n", name[i]);
+        } else {
+            printf("%s does not exist in the symtab\n\n", name[i]);
+        }
+    }
+}
+
+SymTab * createSymTab(int size) {
+    SymTab *table = malloc(sizeof(SymTab));
+    if(table == NULL)
+        return NULL;
+
+    table->size = size;
+    table->contents = malloc(size * sizeof(SymEntry));
+    for(int i = 0; i < size; i++) {
+        table->contents[i] = 0;
+    }
+    table->current = NULL;
+
+    return table;
+}
+
+SymEntry * createSymEntry(char *name) {
+    SymEntry * entry = malloc(sizeof(SymEntry));
+    if(entry == NULL)
+        return NULL;
+    
+    entry->name = strdup(name);
+    entry->attribute = NULL;
+    entry->next = NULL;
+    return entry;
+}
+
+void destroySymTab(SymTab *table) {
+    int notEmpty = 1;
+    startIterator(table);
+    SymEntry * current = table->current;
+    while(notEmpty) {
+        notEmpty = nextEntry(table);
+        free(current->name);
+        free(current->attribute);
+        free(current->next);
+        free(current);
+        current = table->current;
+    }
+    free(table);
+}
+
+int enterName(SymTab *table, char *name) {
+    int hashval = hash(table, name);
+    SymEntry * current = table->contents[hashval];
+
+    if(current == NULL) { // no conflicts
+        SymEntry * entry = createSymEntry(name);
+        table->contents[hashval] = entry;
+        table->current = entry;
+        return 1;
+    }
+
+    SymEntry * prev = current;
+    int *cmp = malloc(sizeof(int));
+    while(current != NULL) { // iterating to end of list and checking for an existing name
+        *cmp = strcmp(current->name, name); // comparing the name of the current entry to the new name
+        if(*cmp == 0) {
+            // name exists in list
+            table->current = current;
+            return 0;
+        }
+        
+        prev = current;
+        current = current->next;
+    }
+
+    SymEntry * entry = createSymEntry(name);
+    prev->next = entry;
+    table->current = entry;
+    return 1;
+}
+
+int findName(SymTab *table, char *name) {
+    int hashval = hash(table, name);
+    SymEntry * current = table->contents[hashval];
+
+    if(current == NULL) {
+        // name does not exist in the list
+        return 0;
+    }
+
+    int *cmp = malloc(sizeof(int));
+    while(current != NULL) { //Iterate through the full list
+        *cmp = strcmp(current->name, name);
+        if(*cmp == 0){
+            //The name exists in the list
+            table->current = current;
+            return 1; 
+        } 
+        current = current->next;
+    }
+
+    // end of list has been reached and name was not found
+    return 0;
+}
+
+int hasCurrent(SymTab *table) {
+    return table->current == NULL;
+}
+
+void setCurrentAttr(SymTab *table, void * attr) {
+    table->current->attribute = attr;
+}
+
+void * getCurrentAttr(SymTab *table) {
+    return table->current->attribute;
+}
+
+char * getCurrentName(SymTab *table) {
+    return table->current->name;
+}
+
+int startIterator(SymTab *table) {
+    for(int i = 0; i < table->size; i++) {
+        if(table->contents[i] != NULL) {
+            table->current = table->contents[i];
+            return 1;
+        }
+    }
+
+    return 0; //end of table reached, therefore table is empty
+}
+
+int nextEntry(SymTab *table) {
+    SymEntry * current = table->current;
+    if(current->next != NULL) {
+        // there is another entry in the list
+        table->current = current->next;
+        return 1;
+    }
+
+    int hashval = hash(table, current->name);
+    int i = hashval + 1;
+    while(i < table->size) {
+        if(table->contents[i] != NULL) {
+            table->current = table->contents[i];
+            return 1;
+        }
+        i++;
+    }
+
+    // all entries have been visited by the iterator
+    return 0;
+}
+
+void printTable(SymTab *table) {
+    int size = table->size;
+    SymEntry * current = malloc(sizeof(SymEntry));
+    for(int i = 0; i < size; i++) {
+        current = table->contents[i];
+        if(table->contents[i] == NULL) {
+            printf("No Value");
+        } else {
+            while(current != NULL) {
+                printf("%s", current->name);
+                current = current->next;
+                if(current != NULL)
+                    printf(" --> ");
+            }
+        }
+        printf("\n");
+    }
+}
+
+// Iterates through the name and creates a number based off of the ascii value of each
+// individual char in order
+// Uses this new integer to create a hash value for the name
+// Returns the hash value of the name
+int hash(SymTab *table, char *name) {
+    int size = table->size;
+    int combined_num = name[0];
+    int i = 1;
+
+    while(name[i] != '\0') {
+        // Adds the ascii value of the char to the end of the current number
+        combined_num = combined_num*10 + name[i];
+        i++;
+    }
+
+    return combined_num % size;
+}
