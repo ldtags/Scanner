@@ -16,7 +16,7 @@ char tokenSpace[MAXLINE+1];
 int main(char *argv[], int argc) {
     // Create SymTab, open source file and listing file (if it exists)
     SymTab *table = createSymTab(17);
-    if(openFiles("/home/compsci/cs442/h3/stest", NULL) == 0) { return 0; }
+    if(openFiles(argv[0], argv[1]) == 0) { return 0; }
     char token;
     char *buf;
     int newToken, i;
@@ -137,6 +137,5 @@ int main(char *argv[], int argc) {
         free(attr);
     } while(nextEntry(table));
     destroySymTab(table);
-    
     return 0;
 }

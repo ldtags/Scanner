@@ -40,8 +40,6 @@ void destroySymTab(SymTab *table) {
     while(notEmpty) {
         notEmpty = nextEntry(table);
         free(current->name);
-        free(current->attribute);
-        free(current->next);
         free(current);
         current = table->current;
     }
