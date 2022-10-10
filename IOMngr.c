@@ -3,6 +3,8 @@
 FILE * source, * out;
 char * currentLine;
 int line, col;
+int printed = 0;
+int newLine = 1;
 
 int openFiles(char * sourceName, char * listingName) {
     source = fopen(sourceName, "r");
@@ -35,7 +37,7 @@ char getNextSourceChar() {
     if(source == NULL) // file doesn't exist / hasn't been opened yet
         return EOF;
 
-    if(currentLine == NULL) {
+    if(newLine) {
         // currentLine is empty
         // get newline
         char buf[MAXLINE];
@@ -44,6 +46,8 @@ char getNextSourceChar() {
         if(currentLine == NULL)
             return EOF;
 
+        newLine = 0;
+        printed = 0;
         col = 0;
         line++;
         if(out != stdout) {
@@ -53,12 +57,14 @@ char getNextSourceChar() {
 
     char sChar = currentLine[col];
     if(sChar == '\0') { 
-        return EOF; 
+        fputc('\n', out);
+        return EOF;
     }
 
-    if(sChar == '\n') { // end of line has been reached, reset currentLine to NULL
-        currentLine = NULL;
-    } 
+    if(sChar == '\n') { // end of line has been reached
+        newLine = 1;
+        currentLine[col] = '\0';
+    }
 
     if(out != stdout) {
         fputc(sChar, out);
@@ -69,12 +75,20 @@ char getNextSourceChar() {
 }
 
 void writeInidcator(int column) {
+    // printing current line if there's no listing file and currentLine hasn't been printed
+    if(out == stdout && !printed) {
+        printf("%d. %s\n", getCurrentLineNum(), currentLine);
+        printed = 1;
+    }
+
+    // accounting for line number
     column += 3;
     int lineNum = line;
     while(lineNum / 10 != 0) {
         column++;
         lineNum /= 10;
     }
+
     for(int i = 0; i < column; i++) {
         fputc(' ', out);
     }
@@ -82,8 +96,14 @@ void writeInidcator(int column) {
 }
 
 void writeMessage(char * message) {
+    // printing current line if there's no listing file and currentLine hasn't been printed
+    if(out == stdout && !printed) {
+        printf("%d. %s", getCurrentLineNum(), currentLine);
+        printed = 1;
+    }
+
     fputc('\n', out);
-    fputs(message, out);
+    fprintf(out, "%s", message);
     fputc('\n', out);
 }
 
