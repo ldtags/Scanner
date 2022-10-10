@@ -47,6 +47,9 @@ char getNextSourceChar() {
 
         col = 0;
         line++;
+        if(out != stdout) {
+            fprintf(out, "%d. ", getCurrentLineNum());
+        }
     }
 
     char sChar = currentLine[col];
@@ -80,11 +83,11 @@ void writeMessage(char * message) {
 }
 
 int markError() {
-    
+
 }
 
 int getCurrentLineNum() {
-    return line;
+    return line + 1;
 }
 
 int getCurrentColumnNum() {

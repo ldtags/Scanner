@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
     SymTab *table = createSymTab(17);
     if(openFiles("stest", argv[2]) == 0) { return 0; }
     char token;
+    char *inputToken;
     int index = 0; // index in current line
     int tlength = 0; // size of current token
     int legal = 0; // determines if the line has any illegal tokens in it
@@ -35,7 +36,7 @@ int main(int argc, char *argv[]) {
 
         // load the next char from the source file into the token array
         tokenSpace[index] = token;
-
+        
         // if the current line is empty, skip it
         if(tokenSpace[0] == '\n') { continue; }
 
@@ -70,7 +71,7 @@ int main(int argc, char *argv[]) {
             // if the current token is legal
             if(errCols[first] == 0) {
                 // taking current token from buffer
-                char inputToken[tlength];
+                inputToken = malloc(tlength * sizeof(char));
                 // initializing a char array of a non-static value
                 for(int i = 0; i < tlength; i++) {
                     inputToken[i] = tokenSpace[first + i];
@@ -88,9 +89,7 @@ int main(int argc, char *argv[]) {
                         attr->count++;
                 }
 
-                for(int i = 0; i < tlength; i++) {
-                    inputToken[i] = '\0';
-                }
+                free(inputToken);
             } else {
                 // token is illegal
                 legal = 1;
