@@ -176,8 +176,8 @@ void printTable(SymTab *table) {
 // Uses this new integer to create a hash value for the name
 // Returns the hash value of the name
 int hash(SymTab *table, char *name) {
-    int size = table->size;
-    int combined_num = name[0];
+    unsigned int size = table->size;
+    unsigned int combined_num = name[0];
     int i = 1;
 
     while(name[i] != '\0') {

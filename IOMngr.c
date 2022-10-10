@@ -50,10 +50,13 @@ char getNextSourceChar() {
     }
 
     char sChar = currentLine[col];
-    if(sChar == 0) // end of line has been reached, reset currentLine to NULL
+    if(sChar == '\n') { // end of line has been reached, reset currentLine to NULL
         currentLine = NULL;
-    else // puts the source char in the list file or stdout
+    } else if(sChar == '\0') {
+        return EOF;
+    } else { // puts the source char in the list file or stdout
         fputc(sChar, out);
+    }
 
     col++;
     return sChar;
