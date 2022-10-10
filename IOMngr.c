@@ -50,21 +50,23 @@ char getNextSourceChar() {
     }
 
     char sChar = currentLine[col];
-    if(sChar == '\n') { // end of line has been reached, reset currentLine to NULL
-        currentLine = NULL;
-        fputc(sChar, out);
-    } else if(sChar == '\0') {
-        return EOF;
-    } else { // puts the source char in the list file or stdout
-        fputc(sChar, out);
+    if(sChar == '\0') { 
+        return EOF; 
     }
 
+    if(sChar == '\n') { // end of line has been reached, reset currentLine to NULL
+        currentLine = NULL;
+    } 
+
+    if(out != stdout) {
+        fputc(sChar, out);
+    }
+    
     col++;
     return sChar;
 }
 
 void writeInidcator(int column) {
-    fputc('\n', out);
     for(int i = 0; i < column; i++) {
         fputc(' ', out);
     }
@@ -75,6 +77,10 @@ void writeMessage(char * message) {
     fputc('\n', out);
     fputs(message, out);
     fputc('\n', out);
+}
+
+int markError() {
+    
 }
 
 int getCurrentLineNum() {
