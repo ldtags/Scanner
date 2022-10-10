@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     SymTab *table = createSymTab(17);
     if(openFiles("stest", argv[2]) == 0) { return 0; }
     char token;
-    char *inputToken;
+    char tokenBuf[MAXLINE+1] = { 0 };
     int index = 0; // index in current line
     int tlength = 0; // size of current token
     int legal = 0; // determines if the line has any illegal tokens in it
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 
         // load the next char from the source file into the token array
         tokenSpace[index] = token;
-        
+
         // if the current line is empty, skip it
         if(tokenSpace[0] == '\n') { continue; }
 
@@ -68,33 +68,37 @@ int main(int argc, char *argv[]) {
                 } // else token is legal
             }
 
+
             // if the current token is legal
             if(errCols[first] == 0) {
-                // taking current token from buffer
-                inputToken = malloc(tlength * sizeof(char));
-                // initializing a char array of a non-static value
+
+                // loading the token into the token buffer
                 for(int i = 0; i < tlength; i++) {
-                    inputToken[i] = tokenSpace[first + i];
+                    tokenBuf[i] = tokenSpace[first + i];
                 }
 
-                // enter the token, if the token is new, add a new attribute struct, else increment the count if it's an ID
-                if(enterName(table, inputToken)) {
+                // if the entered token is new, add a new attribute struct
+                if(enterName(table, tokenBuf)) {
                     attr = (Attribute*) malloc(sizeof(Attribute));
                     if(type == ID) { attr->count = 1; }
                     attr->type = type;
                     setCurrentAttr(table, attr);
                 } else {
+                    // token exists, so increment count if token type is ID
                     attr = getCurrentAttr(table);
                     if(attr->type == ID)
                         attr->count++;
                 }
 
-                free(inputToken);
+                // cleaning out the token buffer
+                for(int i = 0; i < tlength; i++) {
+                    tokenBuf[i] = 0;
+                }
+
             } else {
                 // token is illegal
                 legal = 1;
             }
-
         
             tlength = 0;
         } else {
@@ -111,9 +115,9 @@ int main(int argc, char *argv[]) {
                 
                 if(argc == 1) {
                     // if there is no listing file, print the error line to stdout
-                    printf("%d: %s\n", getCurrentLineNum(), tokenSpace);
+                    printf("%d. %s\n", getCurrentLineNum(), tokenSpace);
                 }
-                
+
                 // printing out errors
                 for(int i = 0; i < index; i++) {
                     // if an error column is odd, it's an illegal character

@@ -11,8 +11,7 @@ int openFiles(char * sourceName, char * listingName) {
     
     // source file successfuly opened
     // initializing file location identifiers
-    // line == -1 means no lines have been read
-    line = -1;
+    line = 0;
     col = 0;
 
     if(listingName != NULL && fopen(listingName, "r") != NULL) {
@@ -70,6 +69,12 @@ char getNextSourceChar() {
 }
 
 void writeInidcator(int column) {
+    column += 3;
+    int lineNum = line;
+    while(lineNum / 10 != 0) {
+        column++;
+        lineNum /= 10;
+    }
     for(int i = 0; i < column; i++) {
         fputc(' ', out);
     }
@@ -82,12 +87,8 @@ void writeMessage(char * message) {
     fputc('\n', out);
 }
 
-int markError() {
-
-}
-
 int getCurrentLineNum() {
-    return line + 1;
+    return line;
 }
 
 int getCurrentColumnNum() {
