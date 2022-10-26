@@ -5,7 +5,6 @@
 
 int hash(SymTab *table, char *name);
 SymEntry * createSymEntry(char *name);
-void printTable(SymTab *table);
 
 SymTab * createSymTab(int size) {
     SymTab *table = malloc(sizeof(SymTab));
@@ -148,25 +147,6 @@ int nextEntry(SymTab *table) {
 
     // all entries have been visited by the iterator
     return 0;
-}
-
-void printTable(SymTab *table) {
-    int size = table->size;
-    SymEntry * current = malloc(sizeof(SymEntry));
-    for(int i = 0; i < size; i++) {
-        current = table->contents[i];
-        if(table->contents[i] == NULL) {
-            printf("No Value");
-        } else {
-            while(current != NULL) {
-                printf("%s", current->name);
-                current = current->next;
-                if(current != NULL)
-                    printf(" --> ");
-            }
-        }
-        printf("\n");
-    }
 }
 
 // Iterates through the name and creates a number based off of the ascii value of each

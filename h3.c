@@ -12,7 +12,6 @@ typedef struct {
 } Attribute;
 
 char tokenSpace[MAXLINE+1];
-char *typeList[3] = {"Hex", "Ten", "Id"};
 
 int invalid(char c) {
     return (c < 48 && c != ' ' && c != '\n') || (c > 57 && c < 65) || (c > 90 && c < 97) || (c > 122);
@@ -21,9 +20,8 @@ int invalid(char c) {
 int main(int argc, char *argv[]) {
     // Create SymTab, open source file and listing file (if it exists)
     SymTab *table = createSymTab(17);
-    if(openFiles("stest", "ltest") == 0) { return 0; }
+    if(openFiles(argv[1], argv[2]) == 0) { return 0; }
     char token;
-    char *name;
     int index = 0; // index in current line
     int tlength = 0; // size of current token
     int errCols[MAXLINE+1] = { 0 }; // marks errors in the columns they occur in
@@ -37,7 +35,12 @@ int main(int argc, char *argv[]) {
         tokenSpace[tlength] = token;
 
         // if the current line is empty, skip it
-        if(tokenSpace[0] == ' ' || tokenSpace[0] == '\n') { continue; }
+        if(tokenSpace[0] == ' ') {
+            index++;
+            continue; 
+        }
+
+        if(tokenSpace[0] == '\n') { continue; }
 
         // if end of token encountered
         if(token == ' ' || token == '\n' || token == EOF) {
@@ -68,7 +71,7 @@ int main(int argc, char *argv[]) {
             }
 
             // if the current token is legal
-            if(errCols[first] == 0) {
+            if(errCols[first] == 0 && tokenSpace[0] != EOF) {
                 tokenSpace[tlength] = '\0';
                 // if the entered token is new, add a new attribute struct
                 if(enterName(table, tokenSpace)) {
@@ -125,26 +128,13 @@ int main(int argc, char *argv[]) {
     if(startIterator(table) == 0)
         return 0;
     
-    printf("Token\t\t\tType\t\t\tCount\n");
+    printf("Token\tType\tCount\n");
     do {
-        attr = getCurrentAttr(table);
-        name = getCurrentName(table);
-        tlength = strlen(name);
-        printf("%s", name);
-        if(tlength - 8 >= 0) {
-            printf("\t\t");
-        } else {
-            printf("\t\t\t");
-        }
-
-        printf("%s\t\t\t", typeList[attr->type]);
-
-        if(attr->type == ID) {
-            printf("%d", attr->count);
-        }
-
+        attr = (Attribute *) getCurrentAttr(table);
+        printf("%s\t%s", getCurrentName(table),
+                               attr->type == HEX ? "Hex" : ( attr->type == TEN ? "Ten" : "Id" ));
+        if(attr->type == ID) { printf("\t%d", attr->count); }
         fputc('\n', stdout);
-        
         free(attr);
     } while(nextEntry(table));
     destroySymTab(table);
